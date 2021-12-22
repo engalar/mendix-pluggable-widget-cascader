@@ -1,26 +1,63 @@
-import { createElement } from "react";
+import { createElement, useState } from "react";
 
+import { Cascader as C } from 'antd';
 
 import { CascaderContainerProps } from "../typings/CascaderProps";
-
-import "antd/es/tree/style/index.css";
-import "antd/es/spin/style/index.css";
-import "antd/es/empty/style/index.css";
-import "antd/es/input/style/index.css";
 
 import "./ui/Cascader.scss";
 
 import { useObserver } from "mobx-react";
 
+const optionLists = [
+    {
+        value: 'zhejiang',
+        label: 'Zhejiang',
+        isLeaf: false,
+    },
+    {
+        value: 'jiangsu',
+        label: 'Jiangsu',
+        isLeaf: false,
+    },
+];
 
+const LazyOptions = () => {
+    const [options, setOptions] = useState(optionLists);
 
+    const onChange = (value: any, selectedOptions: any) => {
+        console.log(value, selectedOptions);
+    };
+
+    const loadData = (selectedOptions: any) => {
+        const targetOption = selectedOptions[selectedOptions.length - 1];
+        targetOption.loading = true;
+
+        // load options lazily
+        setTimeout(() => {
+            targetOption.loading = false;
+            targetOption.children = [
+                {
+                    label: `${targetOption.label} Dynamic 1`,
+                    value: 'dynamic1',
+                },
+                {
+                    label: `${targetOption.label} Dynamic 2`,
+                    value: 'dynamic2',
+                },
+            ];
+            setOptions([...options]);
+        }, 1000);
+    };
+
+    return <C options={options} loadData={loadData} onChange={onChange} changeOnSelect />;
+};
 
 export default function Cascader(props: CascaderContainerProps) {
+    console.log(props);
+
 
     return useObserver(() => (
-        <div>
-            <span>myString</span><span>{props.myString}</span>
-        </div>
+        <LazyOptions />
     ));
 }
 

@@ -4,7 +4,7 @@
  * @author Mendix Widgets Team
  */
 import { CSSProperties } from "react";
-import { EditableValue } from "mendix";
+import { ActionPreview } from "@mendix/pluggable-widgets-typing-generator/dist/typings";
 
 interface CommonProps {
     name: string;
@@ -18,39 +18,33 @@ interface CommonProps {
     style: string;
 }
 
-export type NodeDataSourceEnum = "xpath" | "microflow" | "nanoflow";
+export interface OptionsType {
+    parentNodeEntity: string;
+    nodeEntity: string;
+    relationNodeParent: string;
+    relationNodeSelect: string;
+    onLoad: string;
+}
 
-export type NodeLoadScenarioEnum = "all" | "top";
-
-export type ChildScenarioEnum = "reference" | "action";
-
-export type ChildActionMethodEnum = "microflow" | "nanoflow";
-
-export type RelationTypeEnum = "nodeParent" | "nodeChildren";
-
-export type UiNodeTitleTypeEnum = "attribute" | "nanoflow";
-
-export type EventNodeOnClickActionEnum = "nothing" | "microflow" | "nanoflow" | "open";
-
-export type EventNodeClickFormatEnum = "single" | "double";
-
-export type EventNodeOnClickOpenPageAsEnum = "content" | "popup" | "modal";
-
-export type StateManagementTypeEnum = "disabled" | "localStorage";
-
-export type StateLocalStorageTypeEnum = "session" | "local";
+export interface OptionsVisibilityType {
+    parentNodeEntity: boolean;
+    nodeEntity: boolean;
+    relationNodeParent: boolean;
+    relationNodeSelect: boolean;
+    onLoad: boolean;
+}
 
 export interface CascaderContainerProps extends CommonProps {
-    myString: string;
+    options: OptionsType[];
 }
 
 export interface CascaderPreviewProps {
     class: string;
     style: string;
     styleObject: CSSProperties;
-    myString: string;
+    options: OptionsType[];
 }
 
 export interface VisibilityMap {
-    myString: boolean;
+    options: OptionsVisibilityType[] | boolean;
 }
