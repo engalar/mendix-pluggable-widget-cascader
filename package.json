@@ -30,7 +30,8 @@
     "analyze": "node --max_old_space_size=8000 ./node_modules/.bin/pluggable-widgets-tools release:js --analyze",
     "generateTypings": "gulp generateTypings --gulpfile script/gulp.js",
     "openTestProject": "start tests/testProject/testProject.mpr",
-    "backupTestProject": "cmd /c if not exist dummy\\deployment\\data\\database\\hsqldb\\default (mkdir dummy\\deployment\\data\\database\\hsqldb\\default) else (echo skip 1) && if not exist dummy\\widgets (mkdir dummy\\widgets) else (echo skip 2) && copy tests\\testProject\\testProject.mpr dummy\\ /Y && copy tests\\testProject\\deployment\\data\\database\\hsqldb\\default\\default.script dummy\\deployment\\data\\database\\hsqldb\\default\\",
+    "backupTestProject": "cmd /c (if not exist dummy\\deployment\\data\\database\\hsqldb\\default (mkdir dummy\\deployment\\data\\database\\hsqldb\\default) else (echo skip 1)) && (if not exist dummy\\widgets (mkdir dummy\\widgets) else (echo skip 2)) && copy tests\\testProject\\testProject.mpr dummy\\ /Y && copy tests\\testProject\\deployment\\data\\database\\hsqldb\\default\\default.script dummy\\deployment\\data\\database\\hsqldb\\default\\",
+    "postbackupTestProject": "cmd /c if exist dist\\1.0.0\\com.mendix.widget.custom.Cascader.mpk copy dist\\1.0.0\\com.mendix.widget.custom.Cascader.mpk dummy\\widgets\\",
     "restoreTestProject": "cmd /c xcopy dummy tests\\testProject /E /Y"
   },
   "license": "Apache-2.0",
