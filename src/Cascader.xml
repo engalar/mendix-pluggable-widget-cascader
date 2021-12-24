@@ -20,6 +20,13 @@
                             <caption>选项实体</caption>
                             <description></description>
                         </property>
+                        <property key="labelAttribute" type="attribute" required="true" entityProperty="nodeEntity">
+                            <caption>标签属性</caption>
+                            <description></description>
+                            <attributeTypes>
+                                <attributeType name="String" />
+                            </attributeTypes>
+                        </property>
                         <property key="relationNodeParent" type="entity" required="false" allowNonPersistableEntities="true" isPath="yes" pathType="reference" entityProperty="nodeEntity">
                             <caption>上级引用</caption>
                             <description></description>

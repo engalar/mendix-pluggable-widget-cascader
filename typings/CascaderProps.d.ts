@@ -22,6 +22,7 @@ export interface OptionsType {
     parentNodeEntity: string;
     nodeEntity: string;
     relationNodeParent: string;
+    labelAttribute: string;
     relationNodeSelect: string;
     onLoad: string;
 }
@@ -30,6 +31,7 @@ export interface OptionsVisibilityType {
     parentNodeEntity: boolean;
     nodeEntity: boolean;
     relationNodeParent: boolean;
+    labelAttribute: boolean;
     relationNodeSelect: boolean;
     onLoad: boolean;
 }

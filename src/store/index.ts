@@ -1,57 +1,58 @@
+import { fetchByXpath, getReferencePart } from "@jeltemx/mendix-react-widget-utils";
 import { CascaderOptionType } from "antd/lib/cascader";
-import { configure, flow, makeObservable, observable } from "mobx";
+import { computed, configure, flow, makeObservable, observable } from "mobx";
+import { OptionsType } from "../../typings/CascaderProps";
 import { OptionItem } from "./objects/OptionItem";
 
 configure({ enforceActions: "observed", isolateGlobalState: true, useProxies: "never" });
 
 export class Store {
-    optionItems: OptionItem[];
-    /**
-     * dispose
-     */
-    public dispose() {}
+    optionItems: Map<string, OptionItem> = new Map();
 
-    constructor() {
-        this.optionItems = [];
-        makeObservable(this, { options: observable, load: flow.bound });
+    public dispose() {
+        this.optionItems.forEach(d => d.dispose());
+        this.optionItems = new Map();
     }
 
-    public options: CascaderOptionType[] | undefined = [
-        {
-            value: "zhejiang",
-            label: "Zhejiang",
-            isLeaf: false
-        },
-        {
-            value: "jiangsu",
-            label: "Jiangsu",
-            isLeaf: false
-        }
-    ];
+    rootGuids?: string[];
+    loadWrapper: (selectedOptions?: CascaderOptionType[]) => void;
+
+    constructor(public mxObject: mendix.lib.MxObject, public mxOptions: OptionsType[]) {
+        makeObservable(this, { options: computed, load: flow.bound, optionItems: observable, rootGuids: observable });
+        this.loadWrapper = this.load.bind(this);
+        this.load();
+    }
+
+    public get options(): CascaderOptionType[] | undefined {
+        return this.rootGuids?.map(d => this.optionItems.get(d)!.cascaderOption);
+    }
 
     *load(selectedOptions?: CascaderOptionType[]) {
         if (!selectedOptions) {
-            return;
+            const mxOption = this.mxOptions[0];
+            const guids: string[] = yield fetchByXpath(this.mxObject, mxOption.nodeEntity, "").then(objs =>
+                objs?.map(d => d.getGuid())
+            );
+            this.loadGroup(guids, 0);
+        } else {
+            const mxOption = this.mxOptions[selectedOptions.length];
+            const option = selectedOptions[selectedOptions.length - 1];
+            const guids: string[] = yield fetchByXpath(
+                this.mxObject,
+                mxOption.nodeEntity,
+                `[${getReferencePart(mxOption.relationNodeParent, "referenceAttr")}=${option.value}]`
+            ).then(objs => objs?.map(d => d.getGuid()));
+            this.loadGroup(guids, selectedOptions.length, option.value as string);
         }
-        const targetOption = selectedOptions[selectedOptions.length - 1];
-        targetOption.loading = true;
-
-        targetOption.children = yield new Promise<CascaderOptionType[]>((resolve, _reject) => {
-            setTimeout(() => {
-                resolve([
-                    {
-                        label: `${targetOption.label} Dynamic 1`,
-                        value: "dynamic1"
-                    },
-                    {
-                        label: `${targetOption.label} Dynamic 2`,
-                        value: "dynamic2"
-                    }
-                ]);
-            }, 1000);
+    }
+    loadGroup(guids: string[], idx: number, guid?: string) {
+        guids.forEach(d => {
+            this.optionItems.set(d, new OptionItem(this, d, idx));
         });
-
-        targetOption.loading = false;
-        this.options = [...this.options!];
+        if (guid) {
+            this.optionItems.get(guid)!.childGuids = guids;
+        } else {
+            this.rootGuids = guids;
+        }
     }
 }
