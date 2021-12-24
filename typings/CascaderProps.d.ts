@@ -38,6 +38,13 @@ export interface OptionsVisibilityType {
 
 export interface CascaderContainerProps extends CommonProps {
     options: OptionsType[];
+
+    eventNodeOnClickAction: FullAction;
+    eventNodeClickFormat: ClickType;
+    eventNodeOnClickMicroflow: string;
+    eventNodeOnClickNanoflow: Nanoflow;
+    eventNodeOnClickForm: string;
+    eventNodeOnClickOpenPageAs: OpenPageAs;
 }
 
 export interface CascaderPreviewProps {

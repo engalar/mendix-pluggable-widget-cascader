@@ -48,5 +48,42 @@
                 </properties>
             </property>
         </propertyGroup>
+        <propertyGroup caption="事件">
+            <propertyGroup caption="选择">
+                <property key="eventNodeOnClickAction" type="enumeration" defaultValue="nothing">
+                    <caption>Node click action</caption>
+                    <description>This action is executed when you click a Node (the first column)</description>
+                    <enumerationValues>
+                        <enumerationValue key="nothing">Nothing</enumerationValue>
+                        <enumerationValue key="microflow">Microflow</enumerationValue>
+                        <enumerationValue key="nanoflow">Nanoflow</enumerationValue>
+                        <enumerationValue key="open">Open page</enumerationValue>
+                    </enumerationValues>
+                </property>
+                <property key="eventNodeOnClickMicroflow" type="microflow" required="false">
+                    <caption>Node click Microflow</caption>
+                    <description></description>
+                    <returnType type="Void" />
+                </property>
+                <property key="eventNodeOnClickNanoflow" type="nanoflow" required="false">
+                    <caption>Node click Nanoflow</caption>
+                    <description></description>
+                    <returnType type="Void" />
+                </property>
+                <property key="eventNodeOnClickForm" type="form" required="false">
+                    <caption>Node click page</caption>
+                    <description>The page to open when a Node is clicked</description>
+                </property>
+                <property key="eventNodeOnClickOpenPageAs" type="enumeration" defaultValue="content">
+                    <caption>Node click open page as</caption>
+                    <description/>
+                    <enumerationValues>
+                        <enumerationValue key="content">Full page</enumerationValue>
+                        <enumerationValue key="popup">Popup</enumerationValue>
+                        <enumerationValue key="modal">Blocking popup</enumerationValue>
+                    </enumerationValues>
+                </property>
+            </propertyGroup>
+        </propertyGroup>
     </properties>
 </widget>

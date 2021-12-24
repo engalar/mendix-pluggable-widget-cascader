@@ -15,7 +15,7 @@ export default function Cascader(props: CascaderContainerProps) {
     const [store, setStore] = useState<Store>();
     useEffect(() => {
         if (props.mxObject) {
-            setStore(new Store(props.mxObject, props.options));
+            setStore(new Store(props.mxObject, props));
         }
         return () => {
             store?.dispose();

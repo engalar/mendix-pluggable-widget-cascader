@@ -19,8 +19,8 @@ export class OptionItem extends BaseMxObject {
     public get cascaderOption(): CascaderOptionType {
         return {
             value: this.guid,
-            label: this.mxObject.get(this.store.mxOptions[this.idx].labelAttribute),
-            isLeaf: this.store.mxOptions.length - 1 === this.idx,
+            label: this.mxObject.get(this.store.mxOption.options[this.idx].labelAttribute),
+            isLeaf: this.store.mxOption.options.length - 1 === this.idx,
             loading: this.loading,
             children: this.childGuids?.map(d => this.store.optionItems.get(d)!.cascaderOption)
         };
