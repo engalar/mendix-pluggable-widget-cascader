@@ -35,21 +35,25 @@ export class Store {
         return this.rootGuids?.map(d => this.optionItems.get(d)!.cascaderOption);
     }
 
+    /**
+     * 有两种情况
+     * 1）普通
+     * 2）默认已经选中的若干选项，但实际下拉选项还未加载
+     * @param selectedOptions 选中的选项列表
+     */
     *load(selectedOptions?: CascaderOptionType[]) {
         if (!selectedOptions) {
             const mxOption = this.mxOption.options[0];
-            const guids: string[] = yield fetchByXpath(this.mxObject, mxOption.nodeEntity, "").then(objs =>
-                objs?.map(d => d.getGuid())
-            );
+            const guids: string[] = yield this.fetchGroup(this.mxObject, mxOption, "");
             this.loadGroup(guids, 0);
         } else {
             const mxOption = this.mxOption.options[selectedOptions.length];
             const option = selectedOptions[selectedOptions.length - 1];
-            const guids: string[] = yield fetchByXpath(
+            const guids: string[] = yield this.fetchGroup(
                 this.mxObject,
-                mxOption.nodeEntity,
+                mxOption,
                 `[${getReferencePart(mxOption.relationNodeParent, "referenceAttr")}=${option.value}]`
-            ).then(objs => objs?.map(d => d.getGuid()));
+            );
             this.loadGroup(guids, selectedOptions.length, option.value as string);
         }
     }
@@ -62,5 +66,9 @@ export class Store {
         } else {
             this.rootGuids = guids;
         }
+    }
+
+    fetchGroup(obj: mendix.lib.MxObject, option: CascaderOptionType, constraint: string) {
+        return fetchByXpath(obj, option.nodeEntity, constraint).then(objs => objs?.map(d => d.getGuid()));
     }
 }
