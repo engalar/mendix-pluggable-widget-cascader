@@ -1,7 +1,7 @@
-import { fetchByXpath, getReferencePart } from "@jeltemx/mendix-react-widget-utils";
+import { executeMicroflow, fetchByXpath, getObjectContext, getReferencePart } from "@jeltemx/mendix-react-widget-utils";
 import { CascaderOptionType } from "antd/lib/cascader";
 import { computed, configure, flow, makeObservable, observable } from "mobx";
-import { CascaderContainerProps } from "../../typings/CascaderProps";
+import { CascaderContainerProps, OptionsType } from "../../typings/CascaderProps";
 import { ContextMxObject } from "./objects/ContextMxObject";
 import { OptionItem } from "./objects/OptionItem";
 
@@ -68,7 +68,21 @@ export class Store {
         }
     }
 
-    fetchGroup(obj: mendix.lib.MxObject, option: CascaderOptionType, constraint: string) {
+    /**
+     * 优先使用微流加载数据，否则回落到用xpath
+     * @param obj
+     * @param option
+     * @param constraint
+     * @returns
+     */
+    fetchGroup(obj: mendix.lib.MxObject, option: OptionsType, constraint: string) {
+        if (option.onLoad) {
+            return executeMicroflow(
+                option.onLoad,
+                getObjectContext(obj),
+                this.mxOption.mxform
+            ).then((objs: mendix.lib.MxObject[] | null) => objs?.map(d => d.getGuid()));
+        }
         return fetchByXpath(obj, option.nodeEntity, constraint).then(objs => objs?.map(d => d.getGuid()));
     }
 }
