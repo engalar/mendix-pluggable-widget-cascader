@@ -30,4 +30,8 @@ export class ContextMxObject extends BaseMxObject {
             mx.data.unsubscribe(this.sub2);
         }
     }
+
+    public changeValue(value: string) {
+        this.mxObject?.set(this.store.mxOption.defaultValue, value);
+    }
 }
