@@ -1,17 +1,20 @@
-import { createElement, useCallback } from "react";
+import { createElement, useCallback, useEffect, useState } from "react";
 import { useObserver } from "mobx-react";
 import { Store } from "../store";
 
 import { Cascader as C } from 'antd';
 import { executeAction, getObjectContext, getReferencePart, IAction } from "@jeltemx/mendix-react-widget-utils";
+import { autorun } from "mobx";
 export interface CascaderComponentProps {
     store: Store;
 }
 
 
 export function CascaderComponent(props: CascaderComponentProps) {
+    const [value, setValue] = useState(props.store.ctx.defaultValue);
     const onChange = useCallback(
         (value: string[], _selectedOptions: any) => {
+            setValue(value);
             props.store.mxOption.options.forEach((v, i) => {
                 props.store.mxObject.set(getReferencePart(v.relationNodeSelect, 'referenceAttr'), value[i] ? value[i] : undefined);
             });
@@ -40,7 +43,20 @@ export function CascaderComponent(props: CascaderComponentProps) {
         },
         [props.store],
     )
+
+
+
+    useEffect(() => {
+        const disp = autorun(() => {
+            setValue(props.store.ctx.defaultValue);
+        })
+
+        return () => {
+            disp();
+        }
+    }, [])
+
     return useObserver(() => (
-        <C options={props.store.options} loadData={props.store.loadWrapper} onChange={onChange} changeOnSelect />
+        <C defaultValue={value} value={value} options={props.store.options} loadData={props.store.loadWrapper} onChange={onChange} changeOnSelect />
     ));
 }

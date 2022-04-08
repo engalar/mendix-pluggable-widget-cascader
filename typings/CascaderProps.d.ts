@@ -45,6 +45,7 @@ export interface CascaderContainerProps extends CommonProps {
     eventNodeOnClickNanoflow: Nanoflow;
     eventNodeOnClickForm: string;
     eventNodeOnClickOpenPageAs: OpenPageAs;
+    defaultValue: string;
 }
 
 export interface CascaderPreviewProps {

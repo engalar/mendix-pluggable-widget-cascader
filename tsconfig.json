@@ -6,6 +6,10 @@
       "mendix-client",
       "jest"
     ],
+    "typeRoots": [
+      "./typings",
+      "./node_modules/@engalar"
+    ],
     "resolveJsonModule": true,
     "useDefineForClassFields": true
   }

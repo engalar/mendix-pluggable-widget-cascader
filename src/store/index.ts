@@ -2,12 +2,14 @@ import { fetchByXpath, getReferencePart } from "@jeltemx/mendix-react-widget-uti
 import { CascaderOptionType } from "antd/lib/cascader";
 import { computed, configure, flow, makeObservable, observable } from "mobx";
 import { CascaderContainerProps } from "../../typings/CascaderProps";
+import { ContextMxObject } from "./objects/ContextMxObject";
 import { OptionItem } from "./objects/OptionItem";
 
 configure({ enforceActions: "observed", isolateGlobalState: true, useProxies: "never" });
 
 export class Store {
     optionItems: Map<string, OptionItem> = new Map();
+    ctx: ContextMxObject;
 
     public dispose() {
         this.optionItems.forEach(d => d.dispose());
@@ -18,7 +20,13 @@ export class Store {
     loadWrapper: (selectedOptions?: CascaderOptionType[]) => void;
 
     constructor(public mxObject: mendix.lib.MxObject, public mxOption: CascaderContainerProps) {
-        makeObservable(this, { options: computed, load: flow.bound, optionItems: observable, rootGuids: observable });
+        makeObservable(this, {
+            options: computed,
+            load: flow.bound,
+            optionItems: observable,
+            rootGuids: observable
+        });
+        this.ctx = new ContextMxObject(this, mxObject.getGuid());
         this.loadWrapper = this.load.bind(this);
         this.load();
     }
