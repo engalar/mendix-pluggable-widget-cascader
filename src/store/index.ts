@@ -31,13 +31,19 @@ export class Store {
         this.loadWrapper = this.load.bind(this);
         this.load();
 
-
         autorun(() => {
             this.t = new Map<string, string>();
-            this.options?.forEach((v, i) => {
-                this.t.set(v.value as string, this.rootGuids![i]!);
-            });
-        })
+            let lev = 0;
+
+            this.buildIndex(this.options, lev, this.rootGuids!);
+        });
+    }
+    buildIndex(options: CascaderOptionType[] | undefined, lev: number, guids: string[]) {
+        options?.forEach((v, i) => {
+            this.t.set(("" + lev + v.value) as string, guids![i]);
+            console.log(v.value, v);
+            this.buildIndex(v.children, lev + 1, this.optionItems.get(guids![i])?.childGuids!);
+        });
     }
 
     public get options(): CascaderOptionType[] | undefined {
@@ -57,33 +63,37 @@ export class Store {
             this.loadGroup(guids, 0);
             if (this.ctx.defaultValue.length > 1) {
                 for (let index = 0; index < this.ctx.defaultValue.length - 1; index++) {
-                    const guids: string[] = yield this.loadLevel(this.mxOption.options[index + 1], this.ctx.defaultValue[index]);
-                    this.loadGroup(guids, index + 1, this.t.get(this.ctx.defaultValue[index]) as string);
+                    const parentMxOption = this.mxOption.options[index];
+                    const mxOption = this.mxOption.options[index + 1];
+                    const currentSelectValue = this.ctx.defaultValue[index];
+                    const guid = this.t.get("" + index + currentSelectValue)!;
+                    this.mxObject.set(getReferencePart(parentMxOption.relationNodeSelect, "referenceAttr"), guid);
+                    const guids: string[] = yield this.loadLevel(mxOption, guid);
+                    this.loadGroup(guids, index + 1, this.t.get("" + index + this.ctx.defaultValue[index]) as string);
                 }
             }
         } else {
             const mxOption = this.mxOption.options[selectedOptions.length];
             const option = selectedOptions[selectedOptions.length - 1];
-            const guid = this.t.get(option.value as string)!;
+            const guid = this.t.get(("" + (selectedOptions.length - 1) + option.value) as string)!;
 
-            const guids: string[] = yield this.loadLevel(mxOption, option.value as string);
+            const guids: string[] = yield this.loadLevel(mxOption, guid);
             this.loadGroup(guids, selectedOptions.length, guid as string);
         }
     }
-    loadLevel(mxOption: OptionsType, value: string) {
-        const guid = this.t.get(value as string)!;
+    loadLevel(mxOption: OptionsType, guid: string) {
         return this.fetchGroup(
             this.mxObject,
             mxOption,
             `[${getReferencePart(mxOption.relationNodeParent, "referenceAttr")}=${guid}]`
         );
     }
-    loadGroup(guids: string[], idx: number, guid?: string) {
+    loadGroup(guids: string[], level: number, parentGuid?: string) {
         guids.forEach(d => {
-            this.optionItems.set(d, new OptionItem(this, d, idx));
+            this.optionItems.set(d, new OptionItem(this, d, level));
         });
-        if (guid) {
-            this.optionItems.get(guid)!.childGuids = guids;
+        if (parentGuid) {
+            this.optionItems.get(parentGuid)!.childGuids = guids;
         } else {
             this.rootGuids = guids;
         }
