@@ -1,6 +1,6 @@
 import { executeMicroflow, fetchByXpath, getObjectContext, getReferencePart } from "@jeltemx/mendix-react-widget-utils";
 import { CascaderOptionType } from "antd/lib/cascader";
-import { computed, configure, flow, makeObservable, observable } from "mobx";
+import { autorun, computed, configure, flow, makeObservable, observable } from "mobx";
 import { CascaderContainerProps, OptionsType } from "../../typings/CascaderProps";
 import { ContextMxObject } from "./objects/ContextMxObject";
 import { OptionItem } from "./objects/OptionItem";
@@ -10,6 +10,7 @@ configure({ enforceActions: "observed", isolateGlobalState: true, useProxies: "n
 export class Store {
     optionItems: Map<string, OptionItem> = new Map();
     ctx: ContextMxObject;
+    t = new Map<string, string>();
 
     public dispose() {
         this.optionItems.forEach(d => d.dispose());
@@ -29,6 +30,14 @@ export class Store {
         this.ctx = new ContextMxObject(this, mxObject.getGuid());
         this.loadWrapper = this.load.bind(this);
         this.load();
+
+
+        autorun(() => {
+            this.t = new Map<string, string>();
+            this.options?.forEach((v, i) => {
+                this.t.set(v.value as string, this.rootGuids![i]!);
+            });
+        })
     }
 
     public get options(): CascaderOptionType[] | undefined {
@@ -46,16 +55,28 @@ export class Store {
             const mxOption = this.mxOption.options[0];
             const guids: string[] = yield this.fetchGroup(this.mxObject, mxOption, "");
             this.loadGroup(guids, 0);
+            if (this.ctx.defaultValue.length > 1) {
+                for (let index = 0; index < this.ctx.defaultValue.length - 1; index++) {
+                    const guids: string[] = yield this.loadLevel(this.mxOption.options[index + 1], this.ctx.defaultValue[index]);
+                    this.loadGroup(guids, index + 1, this.t.get(this.ctx.defaultValue[index]) as string);
+                }
+            }
         } else {
             const mxOption = this.mxOption.options[selectedOptions.length];
             const option = selectedOptions[selectedOptions.length - 1];
-            const guids: string[] = yield this.fetchGroup(
-                this.mxObject,
-                mxOption,
-                `[${getReferencePart(mxOption.relationNodeParent, "referenceAttr")}=${option.value}]`
-            );
-            this.loadGroup(guids, selectedOptions.length, option.value as string);
+            const guid = this.t.get(option.value as string)!;
+
+            const guids: string[] = yield this.loadLevel(mxOption, option.value as string);
+            this.loadGroup(guids, selectedOptions.length, guid as string);
         }
+    }
+    loadLevel(mxOption: OptionsType, value: string) {
+        const guid = this.t.get(value as string)!;
+        return this.fetchGroup(
+            this.mxObject,
+            mxOption,
+            `[${getReferencePart(mxOption.relationNodeParent, "referenceAttr")}=${guid}]`
+        );
     }
     loadGroup(guids: string[], idx: number, guid?: string) {
         guids.forEach(d => {

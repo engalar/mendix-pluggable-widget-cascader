@@ -16,8 +16,9 @@ export function CascaderComponent(props: CascaderComponentProps) {
         (value: string[], _selectedOptions: any) => {
             setValue(value);
             props.store.ctx.changeValue(value.join('/'));
+
             props.store.mxOption.options.forEach((v, i) => {
-                props.store.mxObject.set(getReferencePart(v.relationNodeSelect, 'referenceAttr'), value[i] ? value[i] : undefined);
+                props.store.mxObject.set(getReferencePart(v.relationNodeSelect, 'referenceAttr'), value[i] ? props.store.t.get(value[i]) : undefined);
             });
 
             const action: IAction = {};
